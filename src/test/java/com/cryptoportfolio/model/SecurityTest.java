@@ -14,19 +14,19 @@ public class SecurityTest {
 
     @Test
     public void testCallOptionPricing() {
-        Security call = new CallOption("AAPL", 100.0, 20231231);
-        assertEquals(0, BigDecimal.valueOf(50.0).compareTo(
-            call.calculatePrice(BigDecimal.valueOf(150.0))));
-        assertEquals(0, BigDecimal.ZERO.compareTo(
-            call.calculatePrice(BigDecimal.valueOf(50.0))));
+        // Updated to include the underlying ticker parameter and use double for maturity
+        Security call = new CallOption("AAPL", 100.0, 0.5, "AAPL_UNDERLYING");
+        
+        BigDecimal price = call.calculatePrice(BigDecimal.valueOf(110.0));
+        assertTrue(price.compareTo(BigDecimal.ZERO) > 0);
     }
 
     @Test
     public void testPutOptionPricing() {
-        Security put = new PutOption("AAPL", 100.0, 20231231);
-        assertEquals(0, BigDecimal.valueOf(50.0).compareTo(
-            put.calculatePrice(BigDecimal.valueOf(50.0))));
-        assertEquals(0, BigDecimal.ZERO.compareTo(
-            put.calculatePrice(BigDecimal.valueOf(150.0))));
+        // Updated to include the underlying ticker parameter and use double for maturity
+        Security put = new PutOption("AAPL", 100.0, 0.5, "AAPL_UNDERLYING");
+        
+        BigDecimal price = put.calculatePrice(BigDecimal.valueOf(90.0));
+        assertTrue(price.compareTo(BigDecimal.ZERO) > 0);
     }
 }

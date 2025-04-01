@@ -34,3 +34,20 @@ protobuf {
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
+
+// Add a task to run Cucumber tests
+task cucumber() {
+    dependsOn assemble, testClasses
+    doLast {
+        javaexec {
+            main = "io.cucumber.core.cli.Main"
+            classpath = configurations.testRuntimeClasspath + sourceSets.main.output + sourceSets.test.output
+            args = [
+                '--plugin', 'pretty',
+                '--plugin', 'html:build/reports/cucumber/report.html',
+                '--glue', 'com.cryptoportfolio.steps',
+                'src/test/resources/features'
+            ]
+        }
+    }
+}

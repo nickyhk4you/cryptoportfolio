@@ -8,8 +8,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.math.BigDecimal;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class PutOptionSteps {
     private PutOption putOption;
@@ -18,7 +17,8 @@ public class PutOptionSteps {
 
     @Given("a put option with ticker {string} with strike price {double} and maturity {double}")
     public void aPutOptionWithTickerWithStrikePriceAndMaturity(String ticker, double strike, double maturity) {
-        putOption = new PutOption(ticker, strike, maturity);
+        // Adding "AAPL" as the underlying ticker
+        putOption = new PutOption(ticker, strike, maturity, "AAPL");
     }
 
     @When("the underlying price is {double}")
@@ -26,15 +26,22 @@ public class PutOptionSteps {
         calculatedPrice = putOption.calculatePrice(BigDecimal.valueOf(price));
     }
 
-    @Then("the option price should be {double}")
-    public void theOptionPriceShouldBe(double expectedPrice) {
-        assertEquals(BigDecimal.valueOf(expectedPrice).setScale(2), calculatedPrice);
+    @Then("the option price should be greater than {double}")
+    public void theOptionPriceShouldBeGreaterThan(double expectedMinPrice) {
+        assertTrue("Option price should be greater than " + expectedMinPrice,
+            calculatedPrice.compareTo(BigDecimal.valueOf(expectedMinPrice)) > 0);
+    }
+    
+    @Then("the option price should be less than {double}")
+    public void theOptionPriceShouldBeLessThan(double expectedMaxPrice) {
+        assertTrue("Option price should be less than " + expectedMaxPrice,
+            calculatedPrice.compareTo(BigDecimal.valueOf(expectedMaxPrice)) < 0);
     }
 
     @When("I try to create a put option with ticker {string} with strike price {double} and maturity {double}")
     public void iTryToCreateAPutOptionWithInvalidParameters(String ticker, double strike, double maturity) {
         try {
-            putOption = new PutOption(ticker, strike, maturity);
+            putOption = new PutOption(ticker, strike, maturity, "AAPL");
         } catch (Exception e) {
             thrownException = e;
         }

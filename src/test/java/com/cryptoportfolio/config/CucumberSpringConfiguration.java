@@ -7,5 +7,5 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = TestConfig.class)
 public class CucumberSpringConfiguration {
     // This class is intentionally empty
-    // Its purpose is to serve as a holder for the annotations
+    // It's just a holder for the annotations
 }
