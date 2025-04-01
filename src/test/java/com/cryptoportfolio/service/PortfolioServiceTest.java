@@ -12,6 +12,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import java.util.HashMap;
 import java.util.Map;
+import java.math.BigDecimal;
 import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
@@ -21,25 +22,25 @@ public class PortfolioServiceTest {
     @Autowired
     private PortfolioService portfolioService;
 
-    private Map<String, Double> marketPrices;
+    private Map<String, BigDecimal> marketPrices;
 
     @Before
     public void setup() {
         marketPrices = new HashMap<>();
-        marketPrices.put("AAPL", 150.0);
+        marketPrices.put("AAPL", BigDecimal.valueOf(150.0));
         portfolioService.loadPositions("positions.csv");
         portfolioService.loadSecurities();
     }
 
     @Test
     public void testCalculateNAV() {
-        double nav = portfolioService.calculateNAV(marketPrices);
-        assertTrue("NAV should be positive", nav > 0);
+        BigDecimal nav = portfolioService.calculateNAV(marketPrices);
+        assertTrue("NAV should be positive", nav.compareTo(BigDecimal.ZERO) > 0);
     }
 
     @Test
     public void testGetPositionValues() {
-        Map<String, Double> values = portfolioService.getPositionValues(marketPrices);
+        Map<String, BigDecimal> values = portfolioService.getPositionValues(marketPrices);
         assertNotNull("Position values should not be null", values);
         assertFalse("Position values should not be empty", values.isEmpty());
     }

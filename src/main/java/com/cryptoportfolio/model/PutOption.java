@@ -1,18 +1,20 @@
 package com.cryptoportfolio.model;
 
-public class PutOption extends Security{
-    private double strike;
-    private double maturity;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
+public class PutOption extends Security {
+    private final BigDecimal strike;
+    private final BigDecimal maturity;
+    
     public PutOption(String ticker, double strike, double maturity) {
         super(ticker);
-        this.strike = strike;
-        this.maturity = maturity;
+        this.strike = BigDecimal.valueOf(strike);
+        this.maturity = BigDecimal.valueOf(maturity);
     }
-
+    
     @Override
-    public double calculatePrice(double underlyingPrice) {
-        // Black-Scholes would go here, simplified for now
-        return Math.max(0, underlyingPrice - strike);
+    public BigDecimal calculatePrice(BigDecimal underlyingPrice) {
+        return strike.subtract(underlyingPrice).max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
     }
 }

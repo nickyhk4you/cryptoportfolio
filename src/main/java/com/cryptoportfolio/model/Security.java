@@ -1,5 +1,7 @@
 package com.cryptoportfolio.model;
 
+import java.math.BigDecimal;
+
 public abstract class Security {
     private String ticker;
     
@@ -11,5 +13,5 @@ public abstract class Security {
         return ticker;
     }
     
-    public abstract double calculatePrice(double underlyingPrice);
+    public abstract BigDecimal calculatePrice(BigDecimal underlyingPrice);
 }

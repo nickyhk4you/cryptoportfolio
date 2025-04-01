@@ -17,12 +17,16 @@ import java.util.Map;
 import com.cryptoportfolio.util.CsvReader;
 import java.io.IOException;
 
+// Add this import at the top
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 @Service
 public class PortfolioService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     
-    private final Map<String, Double> positions = new HashMap<>();
+    private final Map<String, BigDecimal> positions = new HashMap<>();
     private final Map<String, Security> securities = new HashMap<>();
     
     public void loadPositions(String csvPath) {
@@ -40,14 +44,12 @@ public class PortfolioService {
                 String[] values = line.split(",");
                 if (values.length >= 2) {
                     String ticker = values[0].trim();
-                    double quantity = Double.parseDouble(values[1].trim());
+                    BigDecimal quantity = new BigDecimal(values[1].trim());
                     positions.put(ticker, quantity);
                 }
             }
         } catch (IOException e) {
             System.err.println("Error reading positions file: " + e.getMessage());
-            positions.put("AAPL", 100.0);
-            positions.put("AAPL_CALL_150", 10.0);
         }
     }
     
@@ -81,24 +83,26 @@ public class PortfolioService {
         });
     }
     
-    public double calculateNAV(Map<String, Double> marketPrices) {
+    public BigDecimal calculateNAV(Map<String, BigDecimal> marketPrices) {
         return positions.entrySet().stream()
-            .mapToDouble(entry -> {
+            .map(entry -> {
                 String ticker = entry.getKey();
-                double quantity = entry.getValue();
+                BigDecimal quantity = entry.getValue();
                 Security security = securities.get(ticker);
-                double price = marketPrices.getOrDefault(ticker, 0.0);
-                return quantity * security.calculatePrice(price);
+                BigDecimal price = marketPrices.getOrDefault(ticker, new BigDecimal("0.0"));
+                BigDecimal securityPrice = security.calculatePrice(price);
+                return quantity.multiply(securityPrice);
             })
-            .sum();
+            .reduce(BigDecimal.ZERO, BigDecimal::add)
+            .setScale(2, RoundingMode.HALF_UP);
     }
 
-    public Map<String, Double> getPositionValues(Map<String, Double> marketPrices) {
-        Map<String, Double> positionValues = new HashMap<>();
+    public Map<String, BigDecimal> getPositionValues(Map<String, BigDecimal> marketPrices) {
+        Map<String, BigDecimal> positionValues = new HashMap<>();
         positions.forEach((ticker, quantity) -> {
             Security security = securities.get(ticker);
-            double price = marketPrices.getOrDefault(ticker, 0.0);
-            positionValues.put(ticker, quantity * security.calculatePrice(price));
+            BigDecimal price = marketPrices.getOrDefault(ticker, BigDecimal.ZERO);
+            positionValues.put(ticker, quantity.multiply(security.calculatePrice(price)));
         });
         return positionValues;
     }

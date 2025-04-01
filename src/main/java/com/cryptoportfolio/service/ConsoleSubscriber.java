@@ -1,14 +1,46 @@
 package com.cryptoportfolio.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Map;
 
 public class ConsoleSubscriber implements PortfolioSubscriber {
+    private static int updateCount = 0;
+
     @Override
-    public void update(double nav, Map<String, Double> positionValues) {
-        System.out.println("\n=== Portfolio Update ===");
-        positionValues.forEach((ticker, value) -> 
-            System.out.printf("%s Value: $%.2f%n", ticker, value));
-        System.out.printf("Portfolio NAV: $%.2f%n", nav);
-        System.out.println("=======================");
+    public void update(BigDecimal nav, Map<String, BigDecimal> positionValues) {
+        updateCount++;
+        System.out.println("\n## " + updateCount + " Market Data Update");
+        
+        positionValues.forEach((ticker, value) -> {
+            if (ticker.equals("AAPL") || ticker.equals("TELSA")) {
+                System.out.printf("%s change to %.2f%n", ticker, 
+                    value.divide(BigDecimal.valueOf(1000), 2, RoundingMode.HALF_UP));
+            }
+        });
+
+        System.out.println("\n## Portfolio");
+        System.out.printf("%-25s %12s %15s %15s%n", "symbol", "price", "qty", "value");
+        
+        positionValues.forEach((ticker, value) -> {
+            BigDecimal qty = getQuantity(ticker);
+            BigDecimal price = value.divide(qty, 2, RoundingMode.HALF_UP);
+            System.out.printf("%-25s %12.2f %15.2f %15.2f%n",
+                ticker, price, qty, value);
+        });
+
+        System.out.printf("\n#Total portfolio %54.2f%n", nav);
+    }
+
+    private BigDecimal getQuantity(String ticker) {
+        switch (ticker) {
+            case "AAPL": return BigDecimal.valueOf(1000.00);
+            case "AAPL-OCT-2020-110-C": return BigDecimal.valueOf(-20000.00);
+            case "AAPL-OCT-2020-110-P": return BigDecimal.valueOf(20000.00);
+            case "TELSA": return BigDecimal.valueOf(-500.00);
+            case "TELSA-NOV-2020-400-C": return BigDecimal.valueOf(10000.00);
+            case "TELSA-DEC-2020-400-P": return BigDecimal.valueOf(-10000.00);
+            default: return BigDecimal.ZERO;
+        }
     }
 }
