@@ -56,7 +56,7 @@ public class PortfolioService {
     }
     
     public void loadSecurities() {
-        String sql = "SELECT ticker, type, strike, maturity FROM securities";
+        String sql = "SELECT ticker, type, strike, maturity, underlying_ticker FROM securities";
         
         jdbcTemplate.query(sql, rs -> {
             String ticker = rs.getString("ticker");
@@ -70,12 +70,14 @@ public class PortfolioService {
                 case "CALL":
                     security = new CallOption(ticker, 
                         rs.getDouble("strike"), 
-                        rs.getDouble("maturity"));
+                        rs.getDouble("maturity"),
+                        rs.getString("underlying_ticker"));
                     break;
                 case "PUT":
                     security = new PutOption(ticker,
                         rs.getDouble("strike"),
-                        rs.getDouble("maturity"));
+                        rs.getDouble("maturity"),
+                        rs.getString("underlying_ticker"));
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown security type: " + type);
@@ -101,10 +103,21 @@ public class PortfolioService {
                         return new IllegalStateException("Security not found: " + ticker);
                     });
                 
-                BigDecimal price = marketPrices.getOrDefault(ticker, BigDecimal.ZERO);
-                BigDecimal securityPrice = security.calculatePrice(price);
+                BigDecimal price;
+                if (security instanceof CallOption) {
+                    String underlyingTicker = ((CallOption) security).getUnderlyingTicker();
+                    BigDecimal underlyingPrice = marketPrices.getOrDefault(underlyingTicker, BigDecimal.ZERO);
+                    price = security.calculatePrice(underlyingPrice);
+                } else if (security instanceof PutOption) {
+                    String underlyingTicker = ((PutOption) security).getUnderlyingTicker();
+                    BigDecimal underlyingPrice = marketPrices.getOrDefault(underlyingTicker, BigDecimal.ZERO);
+                    price = security.calculatePrice(underlyingPrice);
+                } else {
+                    price = marketPrices.getOrDefault(ticker, BigDecimal.ZERO);
+                    price = security.calculatePrice(price);
+                }
                 
-                return quantity.multiply(securityPrice);
+                return quantity.multiply(price);
             })
             .reduce(BigDecimal.ZERO, BigDecimal::add)
             .setScale(2, RoundingMode.HALF_UP);
@@ -124,8 +137,21 @@ public class PortfolioService {
                 return;
             }
             
-            BigDecimal price = marketPrices.getOrDefault(ticker, BigDecimal.ZERO);
-            positionValues.put(ticker, quantity.multiply(security.calculatePrice(price)));
+            BigDecimal price;
+            if (security instanceof CallOption) {
+                String underlyingTicker = ((CallOption) security).getUnderlyingTicker();
+                BigDecimal underlyingPrice = marketPrices.getOrDefault(underlyingTicker, BigDecimal.ZERO);
+                price = security.calculatePrice(underlyingPrice);
+            } else if (security instanceof PutOption) {
+                String underlyingTicker = ((PutOption) security).getUnderlyingTicker();
+                BigDecimal underlyingPrice = marketPrices.getOrDefault(underlyingTicker, BigDecimal.ZERO);
+                price = security.calculatePrice(underlyingPrice);
+            } else {
+                price = marketPrices.getOrDefault(ticker, BigDecimal.ZERO);
+                price = security.calculatePrice(price);
+            }
+            
+            positionValues.put(ticker, quantity.multiply(price));
         });
         
         return ImmutableMap.copyOf(positionValues);

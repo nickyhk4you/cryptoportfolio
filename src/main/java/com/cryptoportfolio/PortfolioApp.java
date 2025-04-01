@@ -34,9 +34,9 @@ public class PortfolioApp {
             ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
             executor.scheduleAtFixedRate(() -> {
                 try {
-                    Map<String, BigDecimal> prices = publisher.getAllPrices();
-                    BigDecimal nav = portfolioService.calculateNAV(prices);
-                    Map<String, BigDecimal> positionValues = portfolioService.getPositionValues(prices);
+                    Map<String, BigDecimal> currentPriceMap = publisher.getAllPrices();
+                    BigDecimal nav = portfolioService.calculateNAV(currentPriceMap);
+                    Map<String, BigDecimal> positionValues = portfolioService.getPositionValues(currentPriceMap);
                     subscriber.update(nav, positionValues);
                 } catch (Exception e) {
                     System.err.println("Error in portfolio calculation: " + e.getMessage());
