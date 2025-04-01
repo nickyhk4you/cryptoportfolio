@@ -32,11 +32,9 @@ public class PortfolioApp {
         PortfolioSubscriber subscriber = new ConsoleSubscriber();
         
         executor.scheduleAtFixedRate(() -> {
-            System.out.println("\n## calculating...");
             Map<String, BigDecimal> prices = publisher.getAllPrices();
             BigDecimal nav = portfolioService.calculateNAV(prices);
             Map<String, BigDecimal> positionValues = portfolioService.getPositionValues(prices);
-            
             subscriber.update(nav, positionValues);
         }, 0, 1000, TimeUnit.MILLISECONDS);
     

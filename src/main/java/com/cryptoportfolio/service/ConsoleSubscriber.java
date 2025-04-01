@@ -10,16 +10,19 @@ public class ConsoleSubscriber implements PortfolioSubscriber {
     @Override
     public void update(BigDecimal nav, Map<String, BigDecimal> positionValues) {
         updateCount++;
-        System.out.println("\n## " + updateCount + " Market Data Update");
+        System.out.println("\n## " + updateCount + " Portfolio Update");
         
+        // 市场数据更新
+        System.out.println("Market Data Update:");
         positionValues.forEach((ticker, value) -> {
             if (ticker.equals("AAPL") || ticker.equals("TELSA")) {
                 System.out.printf("%s change to %.2f%n", ticker, 
-                    value.divide(BigDecimal.valueOf(1000), 2, RoundingMode.HALF_UP));
+                    value.divide(getQuantity(ticker), 2, RoundingMode.HALF_UP));
             }
         });
 
-        System.out.println("\n## Portfolio");
+        // 投资组合详情
+        System.out.println("\nPortfolio Details:");
         System.out.printf("%-25s %12s %15s %15s%n", "symbol", "price", "qty", "value");
         
         positionValues.forEach((ticker, value) -> {
@@ -29,7 +32,7 @@ public class ConsoleSubscriber implements PortfolioSubscriber {
                 ticker, price, qty, value);
         });
 
-        System.out.printf("\n#Total portfolio %54.2f%n", nav);
+        System.out.printf("\nTotal Portfolio Value: %.2f%n", nav);
     }
 
     private BigDecimal getQuantity(String ticker) {
