@@ -8,8 +8,6 @@ import com.cryptoportfolio.exception.PortfolioException;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -25,20 +23,13 @@ import java.util.Optional;
 
 @Service
 public class PortfolioService {
-    private static final Logger logger = LoggerFactory.getLogger(PortfolioService.class);
-    
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
     
     private final Map<String, BigDecimal> positions = Maps.newHashMap();
     private final Map<String, Security> securities = Maps.newHashMap();
     
-    /**
-     * Loads positions from a CSV file
-     * 
-     * @param csvPath Path to the CSV file containing positions
-     * @throws PortfolioException if there's an error reading the file
-     */
     public void loadPositions(String csvPath) {
         Preconditions.checkNotNull(csvPath, "CSV path cannot be null");
         
@@ -57,16 +48,13 @@ public class PortfolioService {
                 }
             }
             
-            logger.info("Loaded {} positions from {}", positions.size(), csvPath);
+            System.out.printf("Loaded %d positions from %s%n", positions.size(), csvPath);
         } catch (IOException e) {
-            logger.error("Error reading positions file: {}", e.getMessage());
+            System.err.printf("Error reading positions file: %s%n", e.getMessage());
             throw new PortfolioException("Failed to load positions", e);
         }
     }
     
-    /**
-     * Loads securities from the database
-     */
     public void loadSecurities() {
         String sql = "SELECT ticker, type, strike, maturity FROM securities";
         
@@ -96,15 +84,9 @@ public class PortfolioService {
             securities.put(ticker, security);
         });
         
-        logger.info("Loaded {} securities from database", securities.size());
+        System.out.printf("Loaded %d securities from database%n", securities.size());
     }
     
-    /**
-     * Calculates the Net Asset Value of the portfolio
-     * 
-     * @param marketPrices Current market prices
-     * @return The calculated NAV
-     */
     public BigDecimal calculateNAV(Map<String, BigDecimal> marketPrices) {
         Preconditions.checkNotNull(marketPrices, "Market prices cannot be null");
         
@@ -115,7 +97,7 @@ public class PortfolioService {
                 
                 Security security = Optional.ofNullable(securities.get(ticker))
                     .orElseThrow(() -> {
-                        logger.warn("Security not defined in database: {}", ticker);
+                        System.out.printf("Security not defined in database: %s%n", ticker);
                         return new IllegalStateException("Security not found: " + ticker);
                     });
                 
@@ -128,12 +110,6 @@ public class PortfolioService {
             .setScale(2, RoundingMode.HALF_UP);
     }
 
-    /**
-     * Gets the value of each position in the portfolio
-     * 
-     * @param marketPrices Current market prices
-     * @return Map of ticker to position value
-     */
     public Map<String, BigDecimal> getPositionValues(Map<String, BigDecimal> marketPrices) {
         Preconditions.checkNotNull(marketPrices, "Market prices cannot be null");
         
@@ -143,7 +119,7 @@ public class PortfolioService {
             Security security = securities.get(ticker);
             
             if (security == null) {
-                logger.warn("Security not defined in database: {}", ticker);
+                System.out.printf("Security not defined in database: %s%n", ticker);
                 positionValues.put(ticker, BigDecimal.ZERO);
                 return;
             }

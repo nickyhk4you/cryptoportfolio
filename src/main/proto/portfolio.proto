@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package com.cryptoportfolio.proto;
+
+option java_multiple_files = true;
+option java_package = "com.cryptoportfolio.proto";
+option java_outer_classname = "PortfolioProtos";
+
+message SecurityPrice {
+  string ticker = 1;
+  double price = 2;
+}
+
+message MarketData {
+  repeated SecurityPrice prices = 1;
+  int64 timestamp = 2;
+}
+
+message Position {
+  string ticker = 1;
+  double quantity = 2;
+  double value = 3;
+}
+
+message PortfolioUpdate {
+  double nav = 1;
+  repeated Position positions = 2;
+  int64 timestamp = 3;
+}
