@@ -1,9 +1,12 @@
 package com.cryptoportfolio.service;
 
+import org.springframework.stereotype.Service;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Map;
 
+@Service
 public class ConsoleSubscriber implements PortfolioSubscriber {
     private static int updateCount = 0;
 

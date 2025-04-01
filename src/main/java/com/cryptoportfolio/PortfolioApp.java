@@ -1,62 +1,71 @@
 package com.cryptoportfolio;
 
 import com.cryptoportfolio.config.AppConfig;
-import com.cryptoportfolio.service.MarketDataPublisher;
-import com.cryptoportfolio.service.portfolio.PortfolioService;
 import com.cryptoportfolio.service.ConsoleSubscriber;
+import com.cryptoportfolio.service.market.MarketDataPublisher;
+import com.cryptoportfolio.service.portfolio.PortfolioService;
 import com.cryptoportfolio.service.PortfolioSubscriber;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.HashMap;
-import java.util.Map;
 
 public class PortfolioApp {
-    private static final Map<String, BigDecimal> marketPrices = new HashMap<>();
+    private static final Logger logger = LoggerFactory.getLogger(PortfolioApp.class);
     
     public static void main(String[] args) {
-        AnnotationConfigApplicationContext context = 
-            new AnnotationConfigApplicationContext(AppConfig.class);
-        PortfolioService portfolioService = context.getBean(PortfolioService.class);
-        
-        portfolioService.loadPositions("positions.csv");
-        portfolioService.loadSecurities();
-        
-        MarketDataPublisher publisher = new MarketDataPublisher();
-        publisher.start();
-        
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        PortfolioSubscriber subscriber = new ConsoleSubscriber();
-        
-        executor.scheduleAtFixedRate(() -> {
-            try {
-                System.out.println("\n## 开始计算...");
-                Map<String, BigDecimal> prices = publisher.getAllPrices();
-                System.out.println("获取到价格: " + prices);
-                
-                BigDecimal nav = portfolioService.calculateNAV(prices);
-                System.out.println("计算NAV: " + nav);
-                
-                Map<String, BigDecimal> positionValues = portfolioService.getPositionValues(prices);
-                System.out.println("计算仓位价值: " + positionValues);
-                
-                subscriber.update(nav, positionValues);
-            } catch (Exception e) {
-                System.out.println("ERROR in scheduled task: " + e.getMessage());
-                e.printStackTrace();
-            }
-        }, 0, 1000, TimeUnit.MILLISECONDS);
-    
-        // 添加这段代码防止程序退出
-        try {
+        try (AnnotationConfigApplicationContext context = 
+                new AnnotationConfigApplicationContext(AppConfig.class)) {
+            
+            PortfolioService portfolioService = context.getBean(PortfolioService.class);
+            MarketDataPublisher publisher = context.getBean(MarketDataPublisher.class);
+            PortfolioSubscriber subscriber = context.getBean(ConsoleSubscriber.class);
+            
+            // Load portfolio data
+            String positionsFile = context.getEnvironment()
+                .getProperty("portfolio.positions.file", "positions.csv");
+            portfolioService.loadPositions(positionsFile);
+            portfolioService.loadSecurities();
+            
+            // Start market data publisher
+            publisher.start();
+            
+            // Schedule portfolio updates
+            ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+            executor.scheduleAtFixedRate(() -> {
+                try {
+                    logger.info("Calculating portfolio values");
+                    
+                    Map<String, BigDecimal> prices = publisher.getAllPrices();
+                    logger.info("Market prices: {}", prices);
+                    
+                    BigDecimal nav = portfolioService.calculateNAV(prices);
+                    logger.info("Portfolio NAV: {}", nav);
+                    
+                    Map<String, BigDecimal> positionValues = portfolioService.getPositionValues(prices);
+                    logger.info("Position values: {}", positionValues);
+                    
+                    subscriber.update(nav, positionValues);
+                } catch (Exception e) {
+                    logger.error("Error in portfolio calculation: {}", e.getMessage(), e);
+                }
+            }, 0, 1000, TimeUnit.MILLISECONDS);
+            
+            // Keep application running
             Thread.sleep(Long.MAX_VALUE);
-        } catch (InterruptedException e) {
+            
+            // Cleanup
             executor.shutdown();
             publisher.stop();
-            context.close();
+        } catch (InterruptedException e) {
+            logger.error("Application interrupted", e);
+            Thread.currentThread().interrupt();
         }
     }
 }
