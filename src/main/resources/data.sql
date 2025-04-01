@@ -1,5 +1,6 @@
 -- Stocks
 INSERT INTO securities (ticker, type) VALUES ('AAPL', 'STOCK');
+INSERT INTO securities (ticker, type) VALUES ('TELSA', 'STOCK');
 
 -- Call Options
 INSERT INTO securities (ticker, type, strike, maturity) VALUES 

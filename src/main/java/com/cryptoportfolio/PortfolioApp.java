@@ -32,10 +32,22 @@ public class PortfolioApp {
         PortfolioSubscriber subscriber = new ConsoleSubscriber();
         
         executor.scheduleAtFixedRate(() -> {
-            Map<String, BigDecimal> prices = publisher.getAllPrices();
-            BigDecimal nav = portfolioService.calculateNAV(prices);
-            Map<String, BigDecimal> positionValues = portfolioService.getPositionValues(prices);
-            subscriber.update(nav, positionValues);
+            try {
+                System.out.println("\n## 开始计算...");
+                Map<String, BigDecimal> prices = publisher.getAllPrices();
+                System.out.println("获取到价格: " + prices);
+                
+                BigDecimal nav = portfolioService.calculateNAV(prices);
+                System.out.println("计算NAV: " + nav);
+                
+                Map<String, BigDecimal> positionValues = portfolioService.getPositionValues(prices);
+                System.out.println("计算仓位价值: " + positionValues);
+                
+                subscriber.update(nav, positionValues);
+            } catch (Exception e) {
+                System.out.println("ERROR in scheduled task: " + e.getMessage());
+                e.printStackTrace();
+            }
         }, 0, 1000, TimeUnit.MILLISECONDS);
     
         // 添加这段代码防止程序退出

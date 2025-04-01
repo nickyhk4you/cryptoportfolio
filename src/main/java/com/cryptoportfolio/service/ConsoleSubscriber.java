@@ -9,32 +9,52 @@ public class ConsoleSubscriber implements PortfolioSubscriber {
 
     @Override
     public void update(BigDecimal nav, Map<String, BigDecimal> positionValues) {
-        updateCount++;
-        System.out.println("\n## " + updateCount + " Portfolio Update");
-        
-        // 市场数据更新
-        System.out.println("Market Data Update:");
-        positionValues.forEach((ticker, value) -> {
-            if (ticker.equals("AAPL") || ticker.equals("TELSA")) {
-                System.out.printf("%s change to %.2f%n", ticker, 
-                    value.divide(getQuantity(ticker), 2, RoundingMode.HALF_UP));
+        try {
+            updateCount++;
+            System.out.println("\n## " + updateCount + " Market Data Update");
+            
+            System.out.println("NAV: " + nav);
+            System.out.println("Position Values: " + positionValues);
+            
+            System.out.println("Market Data Update:");
+            if (positionValues != null) {
+                positionValues.forEach((ticker, value) -> {
+                    if (ticker.equals("AAPL") || ticker.equals("TELSA")) {
+                        try {
+                            System.out.printf("%s change to %.2f%n", ticker, 
+                                value.divide(getQuantity(ticker), 2, RoundingMode.HALF_UP));
+                        } catch (Exception e) {
+                            System.out.println("Error processing " + ticker + ": " + e.getMessage());
+                        }
+                    }
+                });
+            } else {
+                System.out.println("Position values is null!");
             }
-        });
 
-        // 投资组合详情
-        System.out.println("\nPortfolio Details:");
-        System.out.printf("%-25s %12s %15s %15s%n", "symbol", "price", "qty", "value");
-        
-        positionValues.forEach((ticker, value) -> {
-            BigDecimal qty = getQuantity(ticker);
-            BigDecimal price = value.divide(qty, 2, RoundingMode.HALF_UP);
-            System.out.printf("%-25s %12.2f %15.2f %15.2f%n",
-                ticker, price, qty, value);
-        });
+            System.out.println("\nPortfolio Details:");
+            System.out.printf("%-25s %12s %15s %15s%n", "symbol", "price", "qty", "value");
+            
+            if (positionValues != null) {
+                positionValues.forEach((ticker, value) -> {
+                    try {
+                        BigDecimal qty = getQuantity(ticker);
+                        BigDecimal price = value.divide(qty, 2, RoundingMode.HALF_UP);
+                        System.out.printf("%-25s %12.2f %15.2f %15.2f%n",
+                            ticker, price, qty, value);
+                    } catch (Exception e) {
+                        System.out.println("Error processing " + ticker + ": " + e.getMessage());
+                    }
+                });
+            }
 
-        System.out.printf("\nTotal Portfolio Value: %.2f%n", nav);
+            System.out.printf("\nTotal Portfolio Value: %.2f%n", nav);
+        } catch (Exception e) {
+            System.out.println("ERROR in ConsoleSubscriber.update(): " + e.getMessage());
+            e.printStackTrace();
+        }
     }
-
+    
     private BigDecimal getQuantity(String ticker) {
         switch (ticker) {
             case "AAPL": return BigDecimal.valueOf(1000.00);
@@ -43,7 +63,7 @@ public class ConsoleSubscriber implements PortfolioSubscriber {
             case "TELSA": return BigDecimal.valueOf(-500.00);
             case "TELSA-NOV-2020-400-C": return BigDecimal.valueOf(10000.00);
             case "TELSA-DEC-2020-400-P": return BigDecimal.valueOf(-10000.00);
-            default: return BigDecimal.ZERO;
+            default: return BigDecimal.ONE; // 避免除零错误
         }
     }
 }
