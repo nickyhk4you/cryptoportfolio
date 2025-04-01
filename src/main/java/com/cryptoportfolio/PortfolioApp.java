@@ -2,13 +2,12 @@ package com.cryptoportfolio;
 
 import com.cryptoportfolio.config.AppConfig;
 import com.cryptoportfolio.service.ConsoleSubscriber;
+import com.cryptoportfolio.service.PortfolioSubscriber;
 import com.cryptoportfolio.service.market.MarketDataPublisher;
 import com.cryptoportfolio.service.portfolio.PortfolioService;
-import com.cryptoportfolio.service.PortfolioSubscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.math.BigDecimal;
 import java.util.Map;
