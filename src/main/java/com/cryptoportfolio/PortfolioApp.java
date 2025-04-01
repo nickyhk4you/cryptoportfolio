@@ -2,7 +2,7 @@ package com.cryptoportfolio;
 
 import com.cryptoportfolio.config.AppConfig;
 import com.cryptoportfolio.service.MarketDataPublisher;
-import com.cryptoportfolio.service.PortfolioService;
+import com.cryptoportfolio.service.portfolio.PortfolioService;
 import com.cryptoportfolio.service.ConsoleSubscriber;
 import com.cryptoportfolio.service.PortfolioSubscriber;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;

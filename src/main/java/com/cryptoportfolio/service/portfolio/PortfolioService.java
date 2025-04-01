@@ -1,4 +1,4 @@
-package com.cryptoportfolio.service;
+package com.cryptoportfolio.service.portfolio;
 
 import com.cryptoportfolio.model.PutOption;
 import com.cryptoportfolio.model.Security;
@@ -11,10 +11,7 @@ import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import com.cryptoportfolio.util.CsvReader;
 
 import java.io.IOException;
 
@@ -90,7 +87,8 @@ public class PortfolioService {
                     BigDecimal quantity = entry.getValue();
                     Security security = securities.get(ticker);
                     if (security == null) {
-                        System.out.println("security ticket is not defined in the database :" + ticker);
+                        System.out.println("security ticket is not defined in the database: " + ticker);
+                        return BigDecimal.ZERO; // Return zero for missing securities
                     }
                     BigDecimal price = marketPrices.getOrDefault(ticker, new BigDecimal("0.0"));
                     BigDecimal securityPrice = security.calculatePrice(price);
@@ -104,6 +102,11 @@ public class PortfolioService {
         Map<String, BigDecimal> positionValues = new HashMap<>();
         positions.forEach((ticker, quantity) -> {
             Security security = securities.get(ticker);
+            if (security == null) {
+                System.out.println("security ticket is not defined in the database: " + ticker);
+                positionValues.put(ticker, BigDecimal.ZERO);
+                return;
+            }
             BigDecimal price = marketPrices.getOrDefault(ticker, BigDecimal.ZERO);
             positionValues.put(ticker, quantity.multiply(security.calculatePrice(price)));
         });
