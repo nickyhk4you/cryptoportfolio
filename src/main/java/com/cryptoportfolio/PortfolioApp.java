@@ -3,7 +3,6 @@ package com.cryptoportfolio;
 import com.cryptoportfolio.config.AppConfig;
 import com.cryptoportfolio.service.ConsoleSubscriber;
 import com.cryptoportfolio.service.PortfolioSubscriber;
-import com.cryptoportfolio.service.ProtoPortfolioSubscriber;
 import com.cryptoportfolio.service.market.MarketDataPublisher;
 import com.cryptoportfolio.service.market.ProtoMarketDataPublisher;
 import com.cryptoportfolio.service.portfolio.PortfolioService;
