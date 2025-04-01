@@ -70,7 +70,7 @@ goto fail
 :execute
 @rem Setup the command line
 
-set CLASSPATH=%APP_HOME%\lib\cryptoportfolio.jar;%APP_HOME%\lib\guava-31.1-jre.jar;%APP_HOME%\lib\spring-context-5.3.20.jar;%APP_HOME%\lib\spring-jdbc-5.3.20.jar;%APP_HOME%\lib\h2-2.1.212.jar;%APP_HOME%\lib\protobuf-java-3.21.1.jar;%APP_HOME%\lib\failureaccess-1.0.1.jar;%APP_HOME%\lib\listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar;%APP_HOME%\lib\jsr305-3.0.2.jar;%APP_HOME%\lib\checker-qual-3.12.0.jar;%APP_HOME%\lib\error_prone_annotations-2.11.0.jar;%APP_HOME%\lib\j2objc-annotations-1.3.jar;%APP_HOME%\lib\spring-aop-5.3.20.jar;%APP_HOME%\lib\spring-tx-5.3.20.jar;%APP_HOME%\lib\spring-beans-5.3.20.jar;%APP_HOME%\lib\spring-expression-5.3.20.jar;%APP_HOME%\lib\spring-core-5.3.20.jar;%APP_HOME%\lib\spring-jcl-5.3.20.jar
+set CLASSPATH=%APP_HOME%\lib\cryptoportfolio.jar;%APP_HOME%\lib\guava-30.1.1-jre.jar;%APP_HOME%\lib\spring-context-5.3.9.jar;%APP_HOME%\lib\spring-jdbc-5.3.9.jar;%APP_HOME%\lib\h2-1.4.200.jar;%APP_HOME%\lib\failureaccess-1.0.1.jar;%APP_HOME%\lib\listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar;%APP_HOME%\lib\jsr305-3.0.2.jar;%APP_HOME%\lib\checker-qual-3.8.0.jar;%APP_HOME%\lib\error_prone_annotations-2.5.1.jar;%APP_HOME%\lib\j2objc-annotations-1.3.jar;%APP_HOME%\lib\spring-aop-5.3.9.jar;%APP_HOME%\lib\spring-tx-5.3.9.jar;%APP_HOME%\lib\spring-beans-5.3.9.jar;%APP_HOME%\lib\spring-expression-5.3.9.jar;%APP_HOME%\lib\spring-core-5.3.9.jar;%APP_HOME%\lib\spring-jcl-5.3.9.jar
 
 
 @rem Execute cryptoportfolio

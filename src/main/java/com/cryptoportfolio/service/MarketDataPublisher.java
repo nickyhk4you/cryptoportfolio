@@ -7,10 +7,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+// 添加 Guava 导入
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
 public class MarketDataPublisher {
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1,
+            new ThreadFactoryBuilder().setNameFormat("market-data-publisher-%d").build());
     private final Random random = new Random();
-    private final Map<String, BigDecimal> currentPrices = new HashMap<>();
+    private final Map<String, BigDecimal> currentPrices = Maps.newConcurrentMap();
     
     public MarketDataPublisher() {
         currentPrices.put("AAPL", BigDecimal.valueOf(110.0));
@@ -35,15 +41,23 @@ public class MarketDataPublisher {
         }, 0, 1000, TimeUnit.MILLISECONDS);
     }
     
+    public void stop() {
+        scheduler.shutdown();
+        try {
+            if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+                scheduler.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            scheduler.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
+    
     public BigDecimal getCurrentPrice(String ticker) {
         return currentPrices.getOrDefault(ticker, BigDecimal.ZERO);
     }
     
     public Map<String, BigDecimal> getAllPrices() {
-        return new HashMap<>(currentPrices);
-    }
-    
-    public void stop() {
-        scheduler.shutdown();
+        return ImmutableMap.copyOf(currentPrices);
     }
 }
