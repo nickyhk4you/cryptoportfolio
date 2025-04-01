@@ -19,6 +19,8 @@ public class MarketDataPublisher {
     
     public void start() {
         scheduler.scheduleAtFixedRate(() -> {
+            System.out.println("\n## update price");
+
             currentPrices.forEach((ticker, price) -> {
                 BigDecimal volatility = BigDecimal.valueOf(0.2);
                 BigDecimal drift = BigDecimal.valueOf(0.05);

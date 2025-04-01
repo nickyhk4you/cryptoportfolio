@@ -32,11 +32,21 @@ public class PortfolioApp {
         PortfolioSubscriber subscriber = new ConsoleSubscriber();
         
         executor.scheduleAtFixedRate(() -> {
+            System.out.println("\n## calculating...");
             Map<String, BigDecimal> prices = publisher.getAllPrices();
             BigDecimal nav = portfolioService.calculateNAV(prices);
             Map<String, BigDecimal> positionValues = portfolioService.getPositionValues(prices);
             
             subscriber.update(nav, positionValues);
-        }, 1, 1, TimeUnit.SECONDS);
+        }, 0, 1000, TimeUnit.MILLISECONDS);
+    
+        // 添加这段代码防止程序退出
+        try {
+            Thread.sleep(Long.MAX_VALUE);
+        } catch (InterruptedException e) {
+            executor.shutdown();
+            publisher.stop();
+            context.close();
+        }
     }
 }
