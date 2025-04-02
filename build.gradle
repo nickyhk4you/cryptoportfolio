@@ -51,3 +51,8 @@ task cucumber() {
         }
     }
 }
+
+application {
+    // Set the main class for the application
+    mainClass = 'com.cryptoportfolio.PortfolioApp'
+}

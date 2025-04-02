@@ -34,7 +34,7 @@ A Java-based application for managing and tracking a portfolio of cryptocurrency
 ```bash
 git clone <repository-url>
 cd /Users/nickhu/dev/java/cryptoportfolio
- ```
+```
 
 2. Build the project:
 ```bash
