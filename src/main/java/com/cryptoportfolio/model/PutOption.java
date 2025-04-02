@@ -7,8 +7,6 @@ import java.math.BigDecimal;
 public class PutOption extends Security {
     private final BigDecimal strike;
     private final BigDecimal maturity;
-    
-    // Add underlying_ticker field
     private final String underlyingTicker;
     
     public PutOption(String ticker, double strike, double maturity, String underlyingTicker) {

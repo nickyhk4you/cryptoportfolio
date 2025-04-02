@@ -66,7 +66,7 @@ public class ConsoleSubscriber implements PortfolioSubscriber {
             case "TELSA": return BigDecimal.valueOf(-500.00);
             case "TELSA-NOV-2020-400-C": return BigDecimal.valueOf(10000.00);
             case "TELSA-DEC-2020-400-P": return BigDecimal.valueOf(-10000.00);
-            default: return BigDecimal.ONE; // 避免除零错误
+            default: return BigDecimal.ONE;
         }
     }
 }

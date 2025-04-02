@@ -12,7 +12,6 @@ public class OptionPricingUtil {
     public static BigDecimal calculateCallPrice(double stockPrice, double strikePrice, double timeToMaturity) {
         System.out.println("OptionPricingUtil - Calculating call option: S=" + stockPrice + ", K=" + strikePrice + ", t=" + timeToMaturity);
         
-        // Check parameter validity
         if (stockPrice <= 0 || strikePrice <= 0 || timeToMaturity <= 0) {
             System.out.println("Invalid option parameters, returning zero value");
             return BigDecimal.ZERO;
@@ -27,17 +26,12 @@ public class OptionPricingUtil {
             
             double d1 = calculateD1(S, K, t, r, sigma);
             double d2 = d1 - sigma * Math.sqrt(t);
-            
-            System.out.println("d1=" + d1 + ", d2=" + d2);
-            
+
             double nd1 = NORMAL.cumulativeProbability(d1);
             double nd2 = NORMAL.cumulativeProbability(d2);
-            
-            System.out.println("N(d1)=" + nd1 + ", N(d2)=" + nd2);
-            
+
             double callPrice = S * nd1 - K * Math.exp(-r * t) * nd2;
             
-            System.out.println("Call option price calculation result: " + callPrice);
             return BigDecimal.valueOf(callPrice).setScale(2, RoundingMode.HALF_UP);
         } catch (Exception e) {
             System.out.println("Error calculating call option: " + e.getMessage());

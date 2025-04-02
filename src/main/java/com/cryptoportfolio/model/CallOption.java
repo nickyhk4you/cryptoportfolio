@@ -7,8 +7,6 @@ import java.math.BigDecimal;
 public class CallOption extends Security {
     private final BigDecimal strike;
     private final BigDecimal maturity;
-    
-    // Add underlying_ticker field
     private final String underlyingTicker;
     
     public CallOption(String ticker, double strike, double maturity, String underlyingTicker) {

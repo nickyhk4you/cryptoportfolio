@@ -50,16 +50,6 @@ public class MarketDataPublisher {
     }
     
     /**
-     * Gets the current price for a ticker
-     * 
-     * @param ticker The ticker symbol
-     * @return The current price
-     */
-    public BigDecimal getCurrentPrice(String ticker) {
-        return currentPrices.getOrDefault(ticker, BigDecimal.ZERO);
-    }
-    
-    /**
      * Gets all current prices
      * 
      * @return Map of ticker to price
