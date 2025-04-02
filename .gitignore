@@ -1,9 +1,4 @@
-/.gradle
-/.gradle
-/bin
-/.gradle
-.gradle/8.10/executionHistory/executionHistory.bin
-/bin
-/.gradle
-/.gradle
-/bin
+# Ignore build directories
+build/
+bin/
+
