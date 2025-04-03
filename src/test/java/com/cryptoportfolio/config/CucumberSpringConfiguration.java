@@ -1,5 +1,6 @@
 package com.cryptoportfolio.config;
 
+import com.cryptoportfolio.service.TestConfig;
 import io.cucumber.spring.CucumberContextConfiguration;
 import org.springframework.test.context.ContextConfiguration;
 
