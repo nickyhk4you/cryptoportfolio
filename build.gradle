@@ -46,6 +46,7 @@ task cucumber() {
                 '--plugin', 'pretty',
                 '--plugin', 'html:build/reports/cucumber/report.html',
                 '--glue', 'com.cryptoportfolio.steps',
+                '--glue', 'com.cryptoportfolio.config',
                 'src/test/resources/features'
             ]
         }
