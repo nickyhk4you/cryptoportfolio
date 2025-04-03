@@ -1,52 +1,53 @@
 package com.cryptoportfolio;
 
-import com.cryptoportfolio.config.AppConfig;
 import com.cryptoportfolio.service.ConsoleSubscriber;
-import com.cryptoportfolio.service.PortfolioSubscriber;
+import com.cryptoportfolio.service.MarketDataService;
+import com.cryptoportfolio.service.market.MarketDataConnector;
 import com.cryptoportfolio.service.market.MarketDataPublisher;
-import com.cryptoportfolio.service.market.ProtoMarketDataPublisher;
 import com.cryptoportfolio.service.portfolio.PortfolioService;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 
-import java.math.BigDecimal;
-import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+@Configuration
+@ComponentScan("com.cryptoportfolio")
 public class PortfolioApp {
-    
+
     public static void main(String[] args) {
         try (AnnotationConfigApplicationContext context = 
-                new AnnotationConfigApplicationContext(AppConfig.class)) {
+                new AnnotationConfigApplicationContext(PortfolioApp.class)) {
             
+            // Get service instances
+            MarketDataService marketDataService = context.getBean(MarketDataService.class);
+            // Specify which MarketDataPublisher bean to use
+            MarketDataPublisher marketDataPublisher = context.getBean("marketDataPublisher", MarketDataPublisher.class);
+            ConsoleSubscriber consoleSubscriber = context.getBean(ConsoleSubscriber.class);
             PortfolioService portfolioService = context.getBean(PortfolioService.class);
-            MarketDataPublisher publisher = context.getBean(ProtoMarketDataPublisher.class);
-            PortfolioSubscriber subscriber = context.getBean(ConsoleSubscriber.class);
             
-            String positionsFile = context.getEnvironment()
-                .getProperty("portfolio.positions.file", "positions.csv");
-            portfolioService.loadPositions(positionsFile);
+            // Load securities and position data
+            System.out.println("Loading portfolio data...");
             portfolioService.loadSecurities();
+            portfolioService.loadPositions("positions.csv");
             
-            publisher.start();
+            // Subscribe to market data updates
+            System.out.println("Subscribing to market data updates...");
+            marketDataService.subscribe(consoleSubscriber);
             
-            ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-            executor.scheduleAtFixedRate(() -> {
-                try {
-                    Map<String, BigDecimal> currentPriceMap = publisher.getAllPrices();
-                    BigDecimal nav = portfolioService.calculateNAV(currentPriceMap);
-                    Map<String, BigDecimal> positionValues = portfolioService.getPositionValues(currentPriceMap);
-                    subscriber.update(nav, positionValues);
-                } catch (Exception e) {
-                    System.err.println("Error in portfolio calculation: " + e.getMessage());
-                }
-            }, 0, 1000, TimeUnit.MILLISECONDS);
+            // Start market data publisher
+            System.out.println("Starting market data publisher...");
+            marketDataPublisher.start();
             
-            Thread.sleep(Long.MAX_VALUE);
-        } catch (InterruptedException e) {
-            System.err.println("Application interrupted: " + e.getMessage());
-            Thread.currentThread().interrupt();
+            // Create connector to link market data publisher with market data service
+            MarketDataConnector connector = new MarketDataConnector(marketDataPublisher, marketDataService);
+            connector.start();
+            
+            try {
+                Thread.sleep(TimeUnit.MINUTES.toMillis(5)); // Run for 5 minutes
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 }
